@@ -3,17 +3,20 @@ use neon::register_module;
 pub use error::Error;
 
 mod error;
+mod ext;
 mod prelude;
 mod runtime;
-mod tasks;
+mod transfer;
+
+pub type Result<T> = std::result::Result<T, crate::Error>;
 
 register_module!(mut cx, {
-    cx.export_function("nativeFetchUrl", tasks::fetch_url).unwrap();
-    cx.export_function("nativeAsyncTask", tasks::async_task).unwrap();
-    cx.export_function("nativeStartRuntime", runtime::start_runtime)
+    cx.export_function("nativeStartTokioRuntime", runtime::start_runtime)
         .unwrap();
-    cx.export_function("nativeShutdownRuntime", runtime::shutdown_runtime)
+    cx.export_function("nativeShutdownTokioRuntime", runtime::shutdown_runtime)
         .unwrap();
-    cx.export_function("nativeFooTask", tasks::foo_task).unwrap();
+    cx.export_function("nativeStartServer", transfer::start_server).unwrap();
+    cx.export_function("nativeSendFile", transfer::send_file).unwrap();
+
     Ok(())
 });
