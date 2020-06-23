@@ -1,0 +1,19 @@
+{
+  "name": "electron-with-rust",
+  "productName": "ElectronWithRust",
+  "version": "1.0.0",
+  "description": "An example file transfer app showing how to create a very performant Electron app with Rust and Tokio.rs",
+  "main": "./main.prod.js",
+  "author": "Rousan Ali <hello@rousan.io> (https://rousan.io)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rousan/electron-with-rust.git"
+  },
+  "homepage": "https://github.com/rousan/electron-with-rust",
+  "scripts": {
+    "electron-rebuild": "node -r ../internals/scripts/babel-register.js ../internals/scripts/electron-rebuild.js",
+    "postinstall": "yarn electron-rebuild"
+  },
+  "license": "MIT",
+  "dependencies": {}
+}

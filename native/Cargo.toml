@@ -1,0 +1,21 @@
+[package]
+name = "electronwithrust"
+version = "0.0.0"
+build = "build.rs"
+edition = "2018"
+
+[lib]
+name = "electronwithrust"
+crate-type = ["cdylib"]
+
+[build-dependencies]
+neon-build = "0.4.0"
+
+[dependencies]
+neon = { version = "0.4.0", features = ["event-handler-api"] }
+neon-serde = "0.4.0"
+reqwest = { version = "0.10", features = ["blocking", "json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "0.2", features = ["full"] }
+num_cpus = "1.13.0"
