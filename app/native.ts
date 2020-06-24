@@ -7,11 +7,12 @@ const {
 
 export type ServerConfig = {
   port: number;
+  receiveFilesDir: string;
   onStart: () => void;
-  onFileReceiveStart: (refId: string, from: { ip: string; port: number }, file: { name: string; size: number }) => void;
-  onFileReceiveProgress: (refId: string, progress: number) => void;
-  onFileReceiveComplete: (refId: string, outputPath: string) => void;
-  onFileReceiveError: (refId: string, msg: string) => void;
+  onReceiveFileStart: (refId: string, from: { ip: string; port: number }, file: { name: string; size: number }) => void;
+  onReceiveFileProgress: (refId: string, progress: number) => void;
+  onReceiveFileComplete: (refId: string, outputPath: string) => void;
+  onReceiveFileError: (refId: string, msg: string) => void;
   onServerError: (msg: string) => void;
 };
 
@@ -19,10 +20,10 @@ export type SendFileConfig = {
   ip: string;
   port: number;
   filePath: string;
-  onFileSendStart: (refId: string, file: { name: string; size: number }) => void;
-  onFileSendProgress: (refId: string, progress: number) => void;
-  onFileSendComplete: (refId: string) => void;
-  onFileSendError: (refId: string, msg: string) => void;
+  onSendFileStart: (refId: string, file: { name: string; size: number }) => void;
+  onSendFileProgress: (refId: string, progress: number) => void;
+  onSendFileComplete: (refId: string) => void;
+  onSendFileError: (refId: string, msg: string) => void;
 };
 
 export function startTokioRuntime() {

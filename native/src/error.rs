@@ -14,13 +14,13 @@ impl Error {
 
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "explorenative::Error: {}", self.msg)
+        write!(f, "native-electron-with-rust::Error: {}", self.msg)
     }
 }
 
 impl Debug for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "explorenative::Error: {}", self.msg)
+        write!(f, "native-electron-with-rust::Error: {}", self.msg)
     }
 }
 

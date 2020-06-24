@@ -1,11 +1,11 @@
 [package]
-name = "electronwithrust"
+name = "native-electron-with-rust"
 version = "0.0.0"
 build = "build.rs"
 edition = "2018"
 
 [lib]
-name = "electronwithrust"
+name = "nativeelectronwithrust"
 crate-type = ["cdylib"]
 
 [build-dependencies]
@@ -19,3 +19,6 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "0.2", features = ["full"] }
 num_cpus = "1.13.0"
+uuid = { version = "0.8", features = ["v4"] }
+async-trait = "0.1"
+regex = "1"
