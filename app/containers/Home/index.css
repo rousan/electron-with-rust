@@ -1,4 +1,21 @@
 .home {
   width: 100%;
   height: 100%;
+  box-sizing: border-box;
+  padding: 20px;
+}
+
+.home .tab-send .send-file-box {
+  margin-bottom: 15px;
+}
+
+.home .tab-send .send-files-list-container {
+  max-height: 400px;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.home .tab-send .ant-upload-list {
+  max-height: 100px;
+  overflow-y: auto;
 }

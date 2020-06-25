@@ -9,6 +9,7 @@ mod prelude;
 mod runtime;
 mod transfer;
 mod types;
+mod utils;
 
 pub type Result<T> = std::result::Result<T, crate::Error>;
 
@@ -19,6 +20,8 @@ register_module!(mut cx, {
         .unwrap();
     cx.export_function("nativeStartServer", transfer::start_server).unwrap();
     cx.export_function("nativeSendFile", transfer::send_file).unwrap();
+    cx.export_function("nativeGenRefId", utils::gen_ref_id).unwrap();
+    cx.export_function("nativeGetFileMeta", utils::get_file_meta).unwrap();
 
     Ok(())
 });

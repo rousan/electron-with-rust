@@ -2,7 +2,10 @@ use crate::prelude::*;
 use regex::Regex;
 use std::path::{Path, PathBuf};
 use tokio::io::ErrorKind;
+use tokio::time::{Duration, Instant};
 use uuid::Uuid;
+
+const STREAM_PROGRESS_CALL_THROTTLE_DURATION: Duration = Duration::from_millis(100);
 
 pub fn gen_uuid() -> String {
     Uuid::new_v4()
@@ -20,6 +23,7 @@ where
     let mut buf = vec![0_u8; 16 * 1024];
 
     let mut written = 0;
+    let mut called_progress: Option<Instant> = None;
     loop {
         let len = match reader.read(&mut buf).await {
             Ok(0) => break,
@@ -35,8 +39,21 @@ where
 
         written += len as u64;
 
-        progress(written);
+        match called_progress {
+            Some(i) => {
+                if i.elapsed() > STREAM_PROGRESS_CALL_THROTTLE_DURATION {
+                    progress(written);
+                    called_progress = Some(Instant::now());
+                }
+            }
+            None => {
+                progress(written);
+                called_progress = Some(Instant::now());
+            }
+        }
     }
+
+    progress(written);
 
     Ok(())
 }

@@ -3,8 +3,7 @@ use crate::prelude::*;
 use crate::runtime;
 use crate::types::TransferFileMeta;
 use serde_json::json;
-use std::net::{IpAddr, SocketAddr};
-use std::path::Path;
+use std::net::IpAddr;
 use std::sync::Arc;
 use tokio::fs::OpenOptions;
 use tokio::net::{TcpListener, TcpStream};
@@ -35,7 +34,7 @@ pub fn start_server(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
         if let Err(err) = result {
             // It means server is shutdown for some reason.
-            on_server_error.emit(move |mut cx| vec![cx.string(err.to_string()).upcast()])
+            on_server_error.emit(move |cx| vec![cx.string(err.to_string()).upcast()])
         }
     });
 
@@ -80,7 +79,7 @@ async fn spawn_tcp_server(
 
             if let Err(err) = result {
                 on_receive_file_error
-                    .emit(move |mut cx| vec![cx.string(ref_id.as_str()).upcast(), cx.string(err.to_string()).upcast()])
+                    .emit(move |cx| vec![cx.string(ref_id.as_str()).upcast(), cx.string(err.to_string()).upcast()])
             }
         });
     }
@@ -114,7 +113,7 @@ async fn handle_socket(
       "name": transfer_meta.name.as_str(),
       "size": transfer_meta.size
     });
-    on_receive_file_start.emit(move |mut cx| {
+    on_receive_file_start.emit(move |cx| {
         vec![
             cx.string(cloned_ref_id.as_str()).upcast(),
             neon_serde::to_value(cx, &from_meta).unwrap(),
@@ -135,7 +134,8 @@ async fn handle_socket(
 
     helpers::pipe(&mut socket, &mut out_file, |progress| {
         let cloned_ref_id = ref_id.clone();
-        on_receive_file_progress.emit(move |mut cx| {
+        println!("{}", progress);
+        on_receive_file_progress.emit(move |cx| {
             vec![
                 cx.string(cloned_ref_id.as_str()).upcast(),
                 cx.number(progress as f64).upcast(),
@@ -146,7 +146,7 @@ async fn handle_socket(
     .context("Failed to pipe socket data to the output file")?;
 
     let cloned_ref_id = ref_id.clone();
-    on_receive_file_complete.emit(move |mut cx| {
+    on_receive_file_complete.emit(move |cx| {
         vec![
             cx.string(cloned_ref_id.as_str()).upcast(),
             cx.string(output_file_path.to_str().unwrap()).upcast(),

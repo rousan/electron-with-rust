@@ -2,7 +2,9 @@ const {
   nativeStartTokioRuntime,
   nativeShutdownTokioRuntime,
   nativeStartServer,
-  nativeSendFile
+  nativeSendFile,
+  nativeGenRefId,
+  nativeGetFileMeta
 } = require('./native.node');
 
 export type ServerConfig = {
@@ -17,10 +19,11 @@ export type ServerConfig = {
 };
 
 export type SendFileConfig = {
+  refId: string;
   ip: string;
   port: number;
   filePath: string;
-  onSendFileStart: (refId: string, file: { name: string; size: number }) => void;
+  onSendFileStart: (refId: string) => void;
   onSendFileProgress: (refId: string, progress: number) => void;
   onSendFileComplete: (refId: string) => void;
   onSendFileError: (refId: string, msg: string) => void;
@@ -40,4 +43,12 @@ export function startServer(config: ServerConfig) {
 
 export function sendFile(config: SendFileConfig) {
   nativeSendFile(config);
+}
+
+export function genRefId(): string {
+  return nativeGenRefId();
+}
+
+export function getFileMeta(path: string): { name: string; size: number } {
+  return nativeGetFileMeta(path);
 }
