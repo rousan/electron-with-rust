@@ -134,7 +134,6 @@ async fn handle_socket(
 
     helpers::pipe(&mut socket, &mut out_file, |progress| {
         let cloned_ref_id = ref_id.clone();
-        println!("{}", progress);
         on_receive_file_progress.emit(move |cx| {
             vec![
                 cx.string(cloned_ref_id.as_str()).upcast(),

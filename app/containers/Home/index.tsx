@@ -1,15 +1,18 @@
 import React, { ChangeEvent } from 'react';
-import { Tabs, Upload, Icon, Input, Button, Divider, message, Empty } from 'antd';
+import { Tabs, Upload, Icon, Input, Button, Divider, message, Empty, InputNumber } from 'antd';
 import { remote } from 'electron';
 import './index.css';
 import { startTokioRuntime, startServer, sendFile, genRefId, getFileMeta } from '../../native';
 import ReceiveFileItem from '../../components/ReceiveFileItem';
 import SendFileItem from '../../components/SendFileItem';
 import { ReceiveFileStatus, SendFileStatus } from '../../types';
+import { isDev } from '../../utils';
 
 const { TabPane } = Tabs;
 const { Dragger } = Upload;
 const { Group: ButtonGroup } = Button;
+const SERVER_PORT = 45670;
+const { Group: InputGroup } = Input;
 
 type TabType = 'send' | 'receive';
 
@@ -19,6 +22,7 @@ type HomeState = {
   activeTab: TabType;
   selectedSendFiles: File[];
   recipientIP: string;
+  recipientPort: number | undefined;
   sendFiles: {
     [key: string]: {
       refId: string;
@@ -44,7 +48,8 @@ class Home extends React.Component<HomeProps, HomeState> {
     this.state = {
       activeTab: 'send',
       selectedSendFiles: [],
-      recipientIP: '',
+      recipientIP: isDev() ? '127.0.0.1' : '',
+      recipientPort: undefined,
       sendFiles: {},
       receiveFiles: {}
     };
@@ -53,9 +58,10 @@ class Home extends React.Component<HomeProps, HomeState> {
   componentDidMount() {
     startTokioRuntime();
     startServer({
-      port: 8888,
-      // receiveFilesDir: remote.app.getPath('downloads'),
-      receiveFilesDir: `${remote.app.getPath('desktop')}/electron-with-rust-outputs`,
+      port: SERVER_PORT,
+      receiveFilesDir: isDev()
+        ? `${remote.app.getPath('desktop')}/electron-with-rust-outputs`
+        : remote.app.getPath('downloads'),
       onStart: () => {
         console.log('Server Started');
       },
@@ -73,7 +79,7 @@ class Home extends React.Component<HomeProps, HomeState> {
         this.setState(prevState => {
           return {
             activeTab: 'receive',
-            receiveFiles: { ...prevState.receiveFiles, [refId]: newFile }
+            receiveFiles: { [refId]: newFile, ...prevState.receiveFiles }
           };
         });
       },
@@ -137,7 +143,7 @@ class Home extends React.Component<HomeProps, HomeState> {
     this.setState(
       prevState => {
         return {
-          sendFiles: { ...prevState.sendFiles, [refId]: newFile }
+          sendFiles: { [refId]: newFile, ...prevState.sendFiles }
         };
       },
       () => {
@@ -171,28 +177,58 @@ class Home extends React.Component<HomeProps, HomeState> {
 
   onChangeRecipientIP(evt: ChangeEvent<HTMLInputElement>) {
     this.setState({
-      recipientIP: evt.target.value
+      recipientIP: evt.target.value.trim()
+    });
+  }
+
+  onChangeRecipientPort(value: number | undefined) {
+    this.setState({
+      recipientPort: value
     });
   }
 
   onClickQueueSendButton() {
-    const { selectedSendFiles } = this.state;
+    const { selectedSendFiles, recipientIP, recipientPort } = this.state;
+
+    if (selectedSendFiles.length === 0) {
+      message.error('Please select file to send');
+      return;
+    }
+
+    if (recipientIP === '') {
+      message.error('Please provide recipient IP address');
+      return;
+    }
 
     selectedSendFiles.forEach(file => {
       setImmediate(() => {
         const refId = genRefId();
         const filePath = file.path;
-        const ip = '127.0.0.1';
-        const port = 8888;
-        this.queueSingleFileToSend(refId, filePath, ip, port);
+        this.queueSingleFileToSend(refId, filePath, recipientIP, recipientPort || SERVER_PORT);
       });
     });
   }
 
-  onClickResetSendButton() {}
+  onClickResetSendButton() {
+    this.setState({
+      selectedSendFiles: []
+    });
+  }
+
+  onClickClearAllSendFilesButton() {
+    this.setState({
+      sendFiles: {}
+    });
+  }
+
+  onClickClearAllReceiveFilesButton() {
+    this.setState({
+      receiveFiles: {}
+    });
+  }
 
   render() {
-    const { activeTab, selectedSendFiles, recipientIP, sendFiles, receiveFiles } = this.state;
+    const { activeTab, selectedSendFiles, recipientIP, recipientPort, sendFiles, receiveFiles } = this.state;
 
     const draggerProps = {
       multiple: true,
@@ -242,17 +278,28 @@ class Home extends React.Component<HomeProps, HomeState> {
                   <p className="ant-upload-hint">Sending Bulk files are also supported</p>
                 </Dragger>
                 <div style={{ marginTop: 20 }}>
-                  <Input
-                    className="input-recipient-ip"
-                    addonBefore="Recipient IP"
-                    placeholder="Enter recipient IP address"
-                    allowClear
-                    value={recipientIP}
-                    onChange={evt => {
-                      this.onChangeRecipientIP(evt);
-                    }}
-                    onPressEnter={() => this.onClickQueueSendButton()}
-                  />
+                  <InputGroup compact>
+                    <Input
+                      className="input-recipient-ip"
+                      addonBefore="Recipient IP"
+                      placeholder="Enter recipient IP address"
+                      allowClear
+                      value={recipientIP}
+                      onChange={evt => {
+                        this.onChangeRecipientIP(evt);
+                      }}
+                      onPressEnter={() => this.onClickQueueSendButton()}
+                      style={{ width: '83%' }}
+                    />
+                    <InputNumber
+                      value={recipientPort}
+                      style={{ width: '17%' }}
+                      placeholder={`${SERVER_PORT}`}
+                      onChange={value => {
+                        this.onChangeRecipientPort(value);
+                      }}
+                    />
+                  </InputGroup>
                 </div>
                 <div style={{ textAlign: 'right', marginTop: 20 }}>
                   <ButtonGroup>
@@ -267,7 +314,12 @@ class Home extends React.Component<HomeProps, HomeState> {
               </div>
               {Object.keys(sendFiles).length > 0 ? (
                 <div className="send-files-list-container">
-                  <Divider type="horizontal" />
+                  <Divider type="horizontal" style={{ margin: '26px 0 10px 0' }} />
+                  <div style={{ textAlign: 'right', marginBottom: 5 }}>
+                    <Button type="link" onClick={() => this.onClickClearAllSendFilesButton()}>
+                      Clear All
+                    </Button>
+                  </div>
                   <div className="send-files-list-wrapper">
                     {Object.keys(sendFiles).map(key => {
                       const { refId, file, to, status } = sendFiles[key];
@@ -280,7 +332,14 @@ class Home extends React.Component<HomeProps, HomeState> {
           </TabPane>
           <TabPane tab="Received Files" key="receive">
             <div className="tab-receive">
-              <div>
+              {Object.keys(receiveFiles).length > 0 ? (
+                <div style={{ textAlign: 'right', marginBottom: 5 }}>
+                  <Button type="link" onClick={() => this.onClickClearAllReceiveFilesButton()}>
+                    Clear All
+                  </Button>
+                </div>
+              ) : null}
+              <div className="receive-files-list-wrapper">
                 {Object.keys(receiveFiles).length > 0 ? (
                   Object.keys(receiveFiles).map(key => {
                     const { refId, file, from, status } = receiveFiles[key];

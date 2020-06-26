@@ -55,24 +55,26 @@ class FileItem extends React.Component<FileItemProps, FileItemState> {
     switch (status.type) {
       case 'connecting': {
         statusElem = (
-          <div>
+          <div style={{ marginTop: 5 }}>
+            <Icon type="loading" style={{ marginRight: 10, color: '#40a9ff' }} />
             Please wait, connecting to
-            <span>{`${status.ip}:${status.port}`}</span>
-            server
+            <span style={{ color: '#40a9ff', userSelect: 'text' }}>{` ${status.ip}:${status.port} `}</span>
           </div>
         );
         break;
       }
       case 'progress': {
         statusElem = (
-          <Progress
-            strokeColor={{
-              '0%': '#108ee9',
-              '100%': '#87d068'
-            }}
-            percent={+((status.progress / file.size) * 100).toExponential(1)}
-            size="small"
-          />
+          <div style={{ paddingRight: 5 }}>
+            <Progress
+              strokeColor={{
+                '0%': '#108ee9',
+                '100%': '#87d068'
+              }}
+              percent={+((status.progress / file.size) * 100).toFixed(1)}
+              size="small"
+            />
+          </div>
         );
         break;
       }
@@ -88,13 +90,7 @@ class FileItem extends React.Component<FileItemProps, FileItemState> {
 
         statusElem = (
           <div style={{ textAlign: 'left', marginTop: 5 }}>
-            <Button
-              type="link"
-              style={{ paddingLeft: 0 }}
-              onClick={() => {
-                shell.showItemInFolder(status.filePath);
-              }}
-            >
+            <Button type="link" style={{ paddingLeft: 0 }} onClick={() => shell.showItemInFolder(status.filePath)}>
               {label}
             </Button>
           </div>
@@ -113,7 +109,13 @@ class FileItem extends React.Component<FileItemProps, FileItemState> {
         <Card size="small">
           <Row type="flex" align="middle">
             <Col span={2}>
-              <div>{fileIcon !== null ? <img alt="File Icon" src={fileIcon} /> : <Icon type="file" />}</div>
+              <div>
+                {fileIcon !== null ? (
+                  <img alt="File Icon" src={fileIcon} />
+                ) : (
+                  <Icon type="file" style={{ fontSize: 20 }} />
+                )}
+              </div>
             </Col>
             <Col span={22}>
               <div style={{ marginLeft: 2 }}>
@@ -123,7 +125,7 @@ class FileItem extends React.Component<FileItemProps, FileItemState> {
                       <div style={{ textAlign: 'left', fontSize: 13, marginLeft: 1 }}>{file.name}</div>
                     </Col>
                     <Col span={12}>
-                      <div style={{ textAlign: 'right', marginRight: 13, fontSize: 12 }}>{prettyBytes(file.size)}</div>
+                      <div style={{ textAlign: 'right', fontSize: 12 }}>{prettyBytes(file.size)}</div>
                     </Col>
                   </Row>
                 </div>

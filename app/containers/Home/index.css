@@ -9,9 +9,13 @@
   margin-bottom: 15px;
 }
 
-.home .tab-send .send-files-list-container {
-  max-height: 400px;
-  padding: 10px;
+.home .tab-send .send-files-list-wrapper {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.home .tab-receive .receive-files-list-wrapper {
+  max-height: 520px;
   overflow-y: auto;
 }
 
