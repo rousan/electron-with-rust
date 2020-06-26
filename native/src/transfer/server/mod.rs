@@ -78,6 +78,7 @@ async fn spawn_tcp_server(
             .await;
 
             if let Err(err) = result {
+                println!("{}", err);
                 on_receive_file_error
                     .emit(move |cx| vec![cx.string(ref_id.as_str()).upcast(), cx.string(err.to_string()).upcast()])
             }
