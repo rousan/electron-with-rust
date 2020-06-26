@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/rousan/electron-with-rust/master/demo.png" alt="Demo on macOS" height="700">
+  <img src="https://raw.githubusercontent.com/rousan/electron-with-rust/master/demo.png" alt="Demo on macOS" height="750">
     <br>
     <br>
 </p>
